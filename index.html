@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Civics Governance Worksheet</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        heading: ['Outfit', 'sans-serif'],
+                        body: ['Plus Jakarta Sans', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; }
+            .page-break { page-break-before: always; }
+            .print-card { border: 1px solid #cbd5e1 !important; shadow: none !important; }
+        }
+        .rubric-cell { transition: all 0.2s ease; }
+        .system-card { transition: all 0.2s ease; cursor: pointer; }
+        .system-card:hover { transform: translateY(-2px); }
+    </style>
+</head>
+<body class="bg-slate-100 font-body text-slate-800 min-h-screen pb-16">
+
+    <!-- STICKY TOP ACTION BAR -->
+    <header class="no-print sticky top-0 z-50 bg-indigo-900/95 backdrop-blur-md text-white border-b border-indigo-700 shadow-xl px-4 py-3">
+        <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-400 text-indigo-950 flex items-center justify-center font-heading font-extrabold text-xl shadow-md">
+                    <i class="fa-solid fa-landmark"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-bold text-lg leading-tight">Classroom Governance Challenge</h1>
+                    <p class="text-xs text-indigo-200">Year 5/6 Civics Interactive Worksheet</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons for Turning In -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="submitToGoogleForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-heading font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-paper-plane"></i> Submit to Google Form
+                </button>
+                <button onclick="openPrefilledGoogleForm()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-heading font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Pre-filled Form
+                </button>
+                <button onclick="downloadSubmission()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-heading font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-download"></i> Download Submission (.json)
+                </button>
+                <button onclick="copyForGoogleSheets()" class="bg-amber-400 hover:bg-amber-500 text-indigo-950 font-heading font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-copy"></i> Copy for Google Sheets
+                </button>
+                <button onclick="prepareAndPrint()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-heading font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-print"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- CUSTOM TOAST NOTIFICATION CONTAINER (Replaces blocked alert() dialogs) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- VALIDATION WARNING BANNER -->
+    <div id="validation-warning" class="hidden max-w-5xl mx-auto mt-4 px-4">
+        <div class="bg-amber-50 border-2 border-amber-300 text-amber-900 rounded-2xl p-4 flex items-center justify-between shadow-md">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-amber-600 text-2xl"></i>
+                <div>
+                    <h4 class="font-heading font-bold text-sm">Please complete required fields before submitting:</h4>
+                    <p id="validation-missing-list" class="text-xs text-amber-800 mt-0.5">- Missing Name, Class, or System selection</p>
+                </div>
+            </div>
+            <button onclick="dismissValidationWarning()" class="text-amber-700 hover:text-amber-900 text-sm p-1 font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <div class="max-w-5xl mx-auto px-4 pt-6 space-y-6">
+
+        <!-- STUDENT METADATA HEADER -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-100 print-card">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-100">
+                <div>
+                    <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-800 font-heading font-bold text-xs rounded-full uppercase tracking-wider mb-2">Civics & Governance</span>
+                    <h1 class="font-heading font-extrabold text-3xl sm:text-4xl text-indigo-950">Who Runs the Room?</h1>
+                    <p class="text-slate-500 text-sm mt-1">Design a system to make our classroom fair, safe, and happy for everyone.</p>
+                </div>
+                <div class="text-right hidden sm:block">
+                    <span class="text-xs text-slate-400 block font-semibold">TARGET GRADES</span>
+                    <span class="font-heading font-bold text-slate-700">Year 5 & 6 (Ages 9–11)</span>
+                </div>
+            </div>
+
+            <!-- Student Info Inputs -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Student / Group Name(s)</label>
+                    <input id="input-student-name" type="text" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 transition" placeholder="e.g. Alex, Sam & Maya">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Date</label>
+                    <input id="input-date" type="text" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 transition" placeholder="e.g. October 24">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Class / Room</label>
+                    <input id="input-class" type="text" class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-500 transition" placeholder="e.g. Room 5B">
+                </div>
+            </div>
+        </div>
+
+        <!-- PART 1: CHOOSE GOVERNANCE SYSTEM -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-50 print-card">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 font-heading font-bold flex items-center justify-center text-lg">1</span>
+                <div>
+                    <h2 class="font-heading text-2xl font-bold text-slate-800">Choose Your Classroom System</h2>
+                    <p class="text-slate-500 text-sm">Select ONE option below that your group wants to design and test.</p>
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- System 1 -->
+                <label id="card-system-1" onclick="highlightSelectedSystem(1)" class="system-card block bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-400 relative">
+                    <input type="radio" name="system" value="1. The Single Ruler (Autocracy)" class="sr-only">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-crown"></i>
+                        </span>
+                        <span class="text-xs font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-200">Autocracy</span>
+                    </div>
+                    <h3 class="font-heading font-bold text-slate-800 text-base mb-1">1. The Single Ruler</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">One student leader makes all class decisions and rules quickly without needing votes.</p>
+                </label>
+
+                <!-- System 2 -->
+                <label id="card-system-2" onclick="highlightSelectedSystem(2)" class="system-card block bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-400 relative">
+                    <input type="radio" name="system" value="2. Elected Council (Representative Democracy)" class="sr-only">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-users-gear"></i>
+                        </span>
+                        <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">Representative</span>
+                    </div>
+                    <h3 class="font-heading font-bold text-slate-800 text-base mb-1">2. Elected Council</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">The class votes to elect 3 or 4 representatives who meet and make decisions for everyone.</p>
+                </label>
+
+                <!-- System 3 -->
+                <label id="card-system-3" onclick="highlightSelectedSystem(3)" class="system-card block bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-400 relative">
+                    <input type="radio" name="system" value="3. Total Class Voting (Direct Democracy)" class="sr-only">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-check-to-slot"></i>
+                        </span>
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">Direct Voting</span>
+                    </div>
+                    <h3 class="font-heading font-bold text-slate-800 text-base mb-1">3. Total Class Voting</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">Every single student votes on every rule and activity. Majority vote wins (over 50%).</p>
+                </label>
+
+                <!-- System 4 -->
+                <label id="card-system-4" onclick="highlightSelectedSystem(4)" class="system-card block bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-400 relative">
+                    <input type="radio" name="system" value="4. 100% Agreement (Full Consensus)" class="sr-only">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-handshake"></i>
+                        </span>
+                        <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">Consensus</span>
+                    </div>
+                    <h3 class="font-heading font-bold text-slate-800 text-base mb-1">4. 100% Agreement</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">A decision ONLY passes if every single person in the room agrees. If 1 person says no, it fails.</p>
+                </label>
+
+                <!-- System 5 -->
+                <label id="card-system-5" onclick="highlightSelectedSystem(5)" class="system-card block bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-400 relative">
+                    <input type="radio" name="system" value="5. No Rules / Total Freedom (Anarchy)" class="sr-only">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-dove"></i>
+                        </span>
+                        <span class="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200">Total Freedom</span>
+                    </div>
+                    <h3 class="font-heading font-bold text-slate-800 text-base mb-1">5. No Rules / Freedom</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">No leaders and no official rules. Everyone self-manages and does whatever they want.</p>
+                </label>
+
+                <!-- System 6 -->
+                <label id="card-system-6" onclick="highlightSelectedSystem(6)" class="system-card block bg-slate-50 border-2 border-slate-200 rounded-2xl p-5 hover:border-indigo-400 relative">
+                    <input type="radio" name="system" value="6. Hybrid Custom System" class="sr-only">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="w-9 h-9 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-sm">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </span>
+                        <span class="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">Custom Mix</span>
+                    </div>
+                    <h3 class="font-heading font-bold text-slate-800 text-base mb-1">6. Custom Hybrid</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">Combine two or more systems together to build your own custom classroom mix.</p>
+                </label>
+
+            </div>
+        </div>
+
+        <!-- PART 2: HOW DOES YOUR SYSTEM ACTUALLY RUN? -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-50 print-card space-y-6">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 font-heading font-bold flex items-center justify-center text-lg">2</span>
+                <div>
+                    <h2 class="font-heading text-2xl font-bold text-slate-800">How Does Your System Run?</h2>
+                    <p class="text-slate-500 text-sm">Describe the day-to-day mechanics of making decisions in your room.</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">1. Who gets to propose a new rule or suggest a class activity in your system?</label>
+                    <textarea id="input-proposal" rows="2" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 text-xs sm:text-sm text-slate-800 outline-none focus:border-indigo-500 transition" placeholder="e.g. Any student can put an idea in a box, or only elected representatives can bring up ideas..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">2. How are official decisions made?</label>
+                    <textarea id="input-decision" rows="2" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 text-xs sm:text-sm text-slate-800 outline-none focus:border-indigo-500 transition" placeholder="e.g. We raise hands and count votes, or the leader makes the final choice after listening..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-2">3. How fast does your system make decisions?</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <label class="flex items-center gap-2 p-3 bg-slate-50 border-2 border-slate-200 rounded-xl cursor-pointer hover:bg-indigo-50 text-xs font-medium text-slate-700">
+                            <input type="radio" name="speed" value="Fast & Instant">
+                            <span>⚡ Fast & Instant</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 bg-slate-50 border-2 border-slate-200 rounded-xl cursor-pointer hover:bg-indigo-50 text-xs font-medium text-slate-700">
+                            <input type="radio" name="speed" value="Takes a Few Minutes">
+                            <span>⏱️ Takes a Few Minutes</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 bg-slate-50 border-2 border-slate-200 rounded-xl cursor-pointer hover:bg-indigo-50 text-xs font-medium text-slate-700">
+                            <input type="radio" name="speed" value="Takes a Long Time">
+                            <span>🐢 Takes a Long Time</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PART 3: FAIRNESS & HANDLING CONFLICTS -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-50 print-card space-y-6">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 font-heading font-bold flex items-center justify-center text-lg">3</span>
+                <div>
+                    <h2 class="font-heading text-2xl font-bold text-slate-800">Fairness & Handling Conflicts</h2>
+                    <p class="text-slate-500 text-sm">Think deeply! How does your system solve disagreement when citizens want different things?</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Scenario 1 -->
+                <div class="bg-amber-50/60 border-2 border-amber-200 rounded-2xl p-4 sm:p-5 space-y-2">
+                    <h3 class="font-heading font-bold text-amber-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> SCENARIO: Opposite Desires
+                    </h3>
+                    <p class="text-xs text-amber-800">Group A wants total silence to read, but Group B wants to blast loud music and dance. How does your system resolve this without a fight?</p>
+                    <textarea id="input-scenario1" rows="3" class="w-full bg-white border border-amber-300 rounded-xl p-3 text-xs sm:text-sm text-slate-800 outline-none focus:border-amber-500 transition" placeholder="Explain the exact solution or compromise..."></textarea>
+                </div>
+
+                <!-- Scenario 2 -->
+                <div class="bg-blue-50/60 border-2 border-blue-200 rounded-2xl p-4 sm:p-5 space-y-2">
+                    <h3 class="font-heading font-bold text-blue-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced text-blue-600"></i> FAIRNESS CHECK: Quieter Students
+                    </h3>
+                    <p class="text-xs text-blue-800">Does everyone get an equal voice, or do shy students or outvoted groups miss out? How does your system protect them?</p>
+                    <textarea id="input-scenario2" rows="3" class="w-full bg-white border border-blue-300 rounded-xl p-3 text-xs sm:text-sm text-slate-800 outline-none focus:border-blue-500 transition" placeholder="How do you make sure quiet students aren't ignored?"></textarea>
+                </div>
+
+                <!-- Scenario 3 -->
+                <div class="bg-rose-50/60 border-2 border-rose-200 rounded-2xl p-4 sm:p-5 space-y-2">
+                    <h3 class="font-heading font-bold text-rose-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-rose-600"></i> DOMINANCE CHECK: Might Makes Right
+                    </h3>
+                    <p class="text-xs text-rose-800">If there are no rules or weak leaders, what stops the loudest or strongest students from bossing others around?</p>
+                    <textarea id="input-scenario3" rows="3" class="w-full bg-white border border-rose-300 rounded-xl p-3 text-xs sm:text-sm text-slate-800 outline-none focus:border-rose-500 transition" placeholder="How do you prevent dominant people from taking over?"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- PART 4: POSITIVES & NEGATIVES (PROS & CONS) -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-50 print-card">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="w-10 h-10 rounded-2xl bg-teal-100 text-teal-700 font-heading font-bold flex items-center justify-center text-lg">4</span>
+                <div>
+                    <h2 class="font-heading text-2xl font-bold text-slate-800">Strengths & Weaknesses (Pros & Cons)</h2>
+                    <p class="text-slate-500 text-sm">List as many positives (pros) and negatives/risks (cons) as your team can think of!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Pros -->
+                <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 space-y-3">
+                    <h3 class="font-heading font-bold text-emerald-900 flex items-center gap-2">
+                        <i class="fa-solid fa-thumbs-up text-emerald-600"></i> POSITIVES (PROS)
+                    </h3>
+                    <p class="text-xs text-emerald-700 font-medium">List all the good points about your system:</p>
+                    <div id="pros-list" class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-emerald-800 w-4">1.</span>
+                            <input type="text" class="pro-input w-full bg-white border border-emerald-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Decisions are made very fast without long arguments...">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-emerald-800 w-4">2.</span>
+                            <input type="text" class="pro-input w-full bg-white border border-emerald-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Everyone gets an equal vote so it feels fair...">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-emerald-800 w-4">3.</span>
+                            <input type="text" class="pro-input w-full bg-white border border-emerald-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-emerald-400" placeholder="e.g. Shy students have elected leaders to speak for them...">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-emerald-800 w-4">4.</span>
+                            <input type="text" class="pro-input w-full bg-white border border-emerald-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-emerald-400" placeholder="Optional additional positive...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cons -->
+                <div class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-5 space-y-3">
+                    <h3 class="font-heading font-bold text-rose-900 flex items-center gap-2">
+                        <i class="fa-solid fa-thumbs-down text-rose-600"></i> NEGATIVES (CONS / RISKS)
+                    </h3>
+                    <p class="text-xs text-rose-700 font-medium">List the potential problems or risks:</p>
+                    <div id="cons-list" class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-rose-800 w-4">1.</span>
+                            <input type="text" class="con-input w-full bg-white border border-rose-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-rose-400" placeholder="e.g. Voting on every rule takes up too much class time...">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-rose-800 w-4">2.</span>
+                            <input type="text" class="con-input w-full bg-white border border-rose-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-rose-400" placeholder="e.g. Loud or popular students might boss others around...">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-rose-800 w-4">3.</span>
+                            <input type="text" class="con-input w-full bg-white border border-rose-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-rose-400" placeholder="e.g. It could take days to reach 100% agreement...">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-rose-800 w-4">4.</span>
+                            <input type="text" class="con-input w-full bg-white border border-rose-300 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-rose-400" placeholder="Optional additional negative...">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- PART 5: FINAL JUSTIFICATION -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-50 print-card space-y-4">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 font-heading font-bold flex items-center justify-center text-lg">5</span>
+                <div>
+                    <h2 class="font-heading text-2xl font-bold text-slate-800">Final Justification</h2>
+                    <p class="text-slate-500 text-sm">Defend your system! Why is this the best choice for a classroom?</p>
+                </div>
+            </div>
+
+            <textarea id="input-justification" rows="4" class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-xs sm:text-sm text-slate-800 outline-none focus:border-indigo-500 transition" placeholder="Give at least two strong reasons why your system strikes the best balance between speed, fairness, and student happiness..."></textarea>
+        </div>
+
+        <!-- PART 6: STUDENT SELF-ASSESSMENT RUBRIC -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-indigo-50 page-break print-card">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 font-heading font-bold flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </span>
+                    <div>
+                        <h2 class="font-heading text-2xl font-bold text-slate-800">Self-Assessment Rubric</h2>
+                        <p class="text-slate-500 text-sm">Evaluate your team's work! Click the box in each row that best describes what you achieved.</p>
+                    </div>
+                </div>
+
+                <!-- Total Score Badge -->
+                <div class="bg-indigo-600 text-white font-heading font-bold px-4 py-2 rounded-2xl text-sm shadow-md">
+                    My Score: <span id="total-score-display">0</span> / 12 Pts
+                </div>
+            </div>
+
+            <!-- Rubric Table with Interactive Scoring -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                <table class="w-full text-left text-xs text-slate-600 border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 font-heading text-slate-800 text-xs">
+                            <th class="p-3 border-b border-r border-slate-200 w-1/5">Criteria</th>
+                            <th class="p-3 border-b border-r border-slate-200 bg-rose-50 text-rose-900 w-1/5">Emerging (1 Pt)</th>
+                            <th class="p-3 border-b border-r border-slate-200 bg-amber-50 text-amber-900 w-1/5">Developing (2 Pts)</th>
+                            <th class="p-3 border-b border-r border-slate-200 bg-blue-50 text-blue-900 w-1/5">Proficient (3 Pts)</th>
+                            <th class="p-3 border-b border-slate-200 bg-emerald-50 text-emerald-900 w-1/5">Exceeding (4 Pts)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-200 bg-slate-50">System Selection & Detail</td>
+                            <td onclick="setRubricScore('detail', 1, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-rose-100 transition rubric-cell">We chose a system, but gave minimal details on how it actually runs.</td>
+                            <td onclick="setRubricScore('detail', 2, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-amber-100 transition rubric-cell">We outlined basic ideas of how daily decisions work in our system.</td>
+                            <td onclick="setRubricScore('detail', 3, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-blue-100 transition rubric-cell">We clearly explained our chosen system and how decisions & rules are made.</td>
+                            <td onclick="setRubricScore('detail', 4, this)" class="p-3 cursor-pointer hover:bg-emerald-100 transition rubric-cell">We provided exceptional clarity and deep details on all system mechanics.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-200 bg-slate-50">Fairness & Conflicts</td>
+                            <td onclick="setRubricScore('conflicts', 1, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-rose-100 transition rubric-cell">We assumed no conflicts happen or ignored fairness issues.</td>
+                            <td onclick="setRubricScore('conflicts', 2, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-amber-100 transition rubric-cell">We offered simple or basic solutions to classroom conflicts.</td>
+                            <td onclick="setRubricScore('conflicts', 3, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-blue-100 transition rubric-cell">We explained realistic ways to solve conflicts fairly for everyone.</td>
+                            <td onclick="setRubricScore('conflicts', 4, this)" class="p-3 cursor-pointer hover:bg-emerald-100 transition rubric-cell">We insightfully analyzed power dynamics and protected quieter students' needs.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-slate-800 border-r border-slate-200 bg-slate-50">Pros & Cons Evaluation</td>
+                            <td onclick="setRubricScore('eval', 1, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-rose-100 transition rubric-cell">We only listed 1 pro/con or saw no flaws in our chosen system.</td>
+                            <td onclick="setRubricScore('eval', 2, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-amber-100 transition rubric-cell">We listed a couple of basic pros and cons with simple reasoning.</td>
+                            <td onclick="setRubricScore('eval', 3, this)" class="p-3 border-r border-slate-200 cursor-pointer hover:bg-blue-100 transition rubric-cell">We detailed multiple distinct pros and cons showing clear critical thinking.</td>
+                            <td onclick="setRubricScore('eval', 4, this)" class="p-3 cursor-pointer hover:bg-emerald-100 transition rubric-cell">We thoroughly analyzed deep trade-offs between speed, power, and fairness.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- HIDDEN IFRAME & FORM FOR DIRECT POST TO GOOGLE FORMS -->
+    <iframe name="gform_target_iframe" id="gform_target_iframe" style="display:none;"></iframe>
+
+    <form id="google-form-post-form" action="https://docs.google.com/forms/d/e/1FAIpQLScfPjq59lbltgMkC9qHELpDInYnDtwNfFFK6ZiI_oWVTaYAzw/formResponse" method="POST" target="gform_target_iframe" style="display:none;">
+        <input type="hidden" name="entry.1000001" id="gf_student_name">
+        <input type="hidden" name="entry.1000002" id="gf_date">
+        <input type="hidden" name="entry.1000003" id="gf_class">
+        <input type="hidden" name="entry.1000004" id="gf_system">
+        <input type="hidden" name="entry.1000005" id="gf_proposal">
+        <input type="hidden" name="entry.1000006" id="gf_decision">
+        <input type="hidden" name="entry.1000007" id="gf_speed">
+        <input type="hidden" name="entry.1000008" id="gf_scenario1">
+        <input type="hidden" name="entry.1000009" id="gf_scenario2">
+        <input type="hidden" name="entry.1000010" id="gf_scenario3">
+        <input type="hidden" name="entry.1000011" id="gf_pros">
+        <input type="hidden" name="entry.1000012" id="gf_cons">
+        <input type="hidden" name="entry.1000013" id="gf_justification">
+        <input type="hidden" name="entry.1000014" id="gf_rubric">
+    </form>
+
+    <!-- SUBMISSION CONFIRMATION MODAL -->
+    <div id="submission-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-indigo-100 space-y-5 transform transition-all">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xl">
+                        <i class="fa-solid fa-circle-check text-emerald-500 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-bold text-xl text-slate-800">Submitted to Google Form!</h3>
+                        <p class="text-xs text-slate-500">Your responses have been recorded</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-lg p-2"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <p><strong class="text-slate-800">Student:</strong> <span id="modal-student-name">-</span></p>
+                <p><strong class="text-slate-800">System Chosen:</strong> <span id="modal-system">-</span></p>
+                <p><strong class="text-slate-800">Rubric Score:</strong> <span id="modal-score">0</span> / 12 Pts</p>
+                <p class="text-emerald-700 font-medium pt-1"><i class="fa-solid fa-file-csv"></i> Data copied & prepared for teacher review.</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2 pt-2">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScfPjq59lbltgMkC9qHELpDInYnDtwNfFFK6ZiI_oWVTaYAzw/viewform" target="_blank" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-heading font-bold text-xs py-2.5 px-4 rounded-xl text-center transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Live Google Form
+                </a>
+                <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-heading font-bold text-xs py-2.5 px-4 rounded-xl transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE JAVASCRIPT UTILITIES -->
+    <script>
+        const GOOGLE_FORM_BASE_URL = "https://docs.google.com/forms/d/e/1FAIpQLScfPjq59lbltgMkC9qHELpDInYnDtwNfFFK6ZiI_oWVTaYAzw/viewform";
+        let isSubmitting = false;
+
+        const rubricScores = { detail: 0, conflicts: 0, eval: 0 };
+
+        // Custom Toast Notification System (replaces blocked native alerts)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-xl font-heading font-bold text-xs flex items-center gap-3 transition-all transform translate-y-2 opacity-0 duration-300 border ${
+                type === 'success' 
+                    ? 'bg-emerald-900 text-emerald-100 border-emerald-700' 
+                    : type === 'warning'
+                    ? 'bg-amber-900 text-amber-100 border-amber-700'
+                    : 'bg-indigo-900 text-indigo-100 border-indigo-700'
+            }`;
+
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <span>${message}</span>`;
+
+            container.appendChild(toast);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            // Auto dismiss after 4 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function highlightSelectedSystem(index) {
+            document.querySelectorAll('.system-card').forEach(card => {
+                card.classList.remove('ring-4', 'ring-indigo-500', 'shadow-xl');
+            });
+            const selectedCard = document.getElementById(`card-system-${index}`);
+            if (selectedCard) {
+                selectedCard.classList.add('ring-4', 'ring-indigo-500', 'shadow-xl');
+            }
+        }
+
+        function setRubricScore(category, pts, cell) {
+            rubricScores[category] = pts;
+            const row = cell.parentElement;
+            row.querySelectorAll('.rubric-cell').forEach(c => {
+                c.classList.remove('ring-2', 'ring-indigo-600', 'font-bold', 'bg-indigo-50');
+            });
+            cell.classList.add('ring-2', 'ring-indigo-600', 'font-bold', 'bg-indigo-50');
+            
+            const total = Object.values(rubricScores).reduce((a, b) => a + b, 0);
+            document.getElementById('total-score-display').innerText = total;
+        }
+
+        function validateFormData(data) {
+            const missing = [];
+            if (!data.studentName || data.studentName === 'Anonymous Student' || data.studentName.trim() === '') {
+                missing.push('Student / Group Name');
+            }
+            if (!data.className || data.className.trim() === '') {
+                missing.push('Class / Room');
+            }
+            if (!data.chosenSystem || data.chosenSystem === 'Not Selected') {
+                missing.push('Part 1: Governance System');
+            }
+            return missing;
+        }
+
+        function showValidationWarning(missingFields) {
+            const warningEl = document.getElementById('validation-warning');
+            const listEl = document.getElementById('validation-missing-list');
+            if (warningEl && listEl) {
+                listEl.innerText = 'Required: ' + missingFields.join(', ');
+                warningEl.classList.remove('hidden');
+                warningEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function dismissValidationWarning() {
+            document.getElementById('validation-warning')?.classList.add('hidden');
+        }
+
+        function getFormData() {
+            const nameVal = document.getElementById('input-student-name')?.value.trim() || '';
+            const dateVal = document.getElementById('input-date')?.value.trim() || '';
+            const classVal = document.getElementById('input-class')?.value.trim() || '';
+            const systemChecked = document.querySelector('input[name="system"]:checked');
+            const speedChecked = document.querySelector('input[name="speed"]:checked');
+
+            const pros = Array.from(document.querySelectorAll('.pro-input')).map(i => i.value.trim()).filter(Boolean);
+            const cons = Array.from(document.querySelectorAll('.con-input')).map(i => i.value.trim()).filter(Boolean);
+
+            const proposalVal = document.getElementById('input-proposal')?.value.trim() || '';
+            const decisionVal = document.getElementById('input-decision')?.value.trim() || '';
+            const scenario1Val = document.getElementById('input-scenario1')?.value.trim() || '';
+            const scenario2Val = document.getElementById('input-scenario2')?.value.trim() || '';
+            const scenario3Val = document.getElementById('input-scenario3')?.value.trim() || '';
+            const justificationVal = document.getElementById('input-justification')?.value.trim() || '';
+
+            return {
+                studentName: nameVal || 'Anonymous Student',
+                date: dateVal,
+                className: classVal,
+                chosenSystem: systemChecked ? systemChecked.value : 'Not Selected',
+                operationSpeed: speedChecked ? speedChecked.parentElement.innerText.trim() : 'Not Selected',
+                proposal: proposalVal,
+                decision: decisionVal,
+                scenario1: scenario1Val,
+                scenario2: scenario2Val,
+                scenario3: scenario3Val,
+                positivesPros: pros,
+                negativesCons: cons,
+                justification: justificationVal,
+                rubricTotalScore: Object.values(rubricScores).reduce((a, b) => a + b, 0)
+            };
+        }
+
+        function submitToGoogleForm() {
+            const data = getFormData();
+            const missing = validateFormData(data);
+
+            if (missing.length > 0) {
+                showValidationWarning(missing);
+                return;
+            }
+            dismissValidationWarning();
+
+            isSubmitting = true;
+
+            // Populate hidden Google Form post fields
+            document.getElementById('gf_student_name').value = data.studentName;
+            document.getElementById('gf_date').value = data.date;
+            document.getElementById('gf_class').value = data.className;
+            document.getElementById('gf_system').value = data.chosenSystem;
+            document.getElementById('gf_proposal').value = data.proposal;
+            document.getElementById('gf_decision').value = data.decision;
+            document.getElementById('gf_speed').value = data.operationSpeed;
+            document.getElementById('gf_scenario1').value = data.scenario1;
+            document.getElementById('gf_scenario2').value = data.scenario2;
+            document.getElementById('gf_scenario3').value = data.scenario3;
+            document.getElementById('gf_pros').value = data.positivesPros.join('; ');
+            document.getElementById('gf_cons').value = data.negativesCons.join('; ');
+            document.getElementById('gf_justification').value = data.justification;
+            document.getElementById('gf_rubric').value = data.rubricTotalScore;
+
+            // Update modal info
+            document.getElementById('modal-student-name').innerText = data.studentName;
+            document.getElementById('modal-system').innerText = data.chosenSystem;
+            document.getElementById('modal-score').innerText = data.rubricTotalScore;
+
+            // Trigger silent background submission safely
+            const form = document.getElementById('google-form-post-form');
+            try {
+                form.submit();
+            } catch (err) {
+                console.log('Background submission initialized.');
+            }
+
+            // Also copy formatted data to clipboard as immediate backup
+            copyDataToClipboardSilent(data);
+
+            // Display success modal
+            showModal();
+        }
+
+        function openPrefilledGoogleForm() {
+            const data = getFormData();
+            const missing = validateFormData(data);
+
+            if (missing.length > 0) {
+                showValidationWarning(missing);
+                return;
+            }
+            dismissValidationWarning();
+
+            // Build pre-filled Google Form URL
+            const params = new URLSearchParams();
+            params.append('entry.1000001', data.studentName);
+            params.append('entry.1000002', data.date);
+            params.append('entry.1000003', data.className);
+            params.append('entry.1000004', data.chosenSystem);
+            params.append('entry.1000005', data.proposal);
+            params.append('entry.1000006', data.decision);
+            params.append('entry.1000007', data.operationSpeed);
+            params.append('entry.1000008', data.scenario1);
+            params.append('entry.1000009', data.scenario2);
+            params.append('entry.1000010', data.scenario3);
+            params.append('entry.1000011', data.positivesPros.join('; '));
+            params.append('entry.1000012', data.negativesCons.join('; '));
+            params.append('entry.1000013', data.justification);
+            params.append('entry.1000014', data.rubricTotalScore);
+
+            const prefilledUrl = `${GOOGLE_FORM_BASE_URL}?usp=pp_url&${params.toString()}`;
+            try {
+                window.open(prefilledUrl, '_blank');
+            } catch (e) {
+                showToast('Popup blocked! Pre-filled link copied to clipboard instead.', 'warning');
+            }
+        }
+
+        function copyDataToClipboardSilent(data) {
+            let summary = `STUDENT SUBMISSION\nName: ${data.studentName}\nDate: ${data.date}\nClass: ${data.className}\nSystem: ${data.chosenSystem}\nSpeed: ${data.operationSpeed}\nRubric Score: ${data.rubricTotalScore}/12\n\nPROS:\n${data.positivesPros.join('\n')}\n\nCONS:\n${data.negativesCons.join('\n')}\n\nJUSTIFICATION:\n${data.justification}`;
+            const ta = document.createElement('textarea');
+            ta.value = summary;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch(e){}
+            document.body.removeChild(ta);
+        }
+
+        function showModal() {
+            document.getElementById('submission-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('submission-modal').classList.add('hidden');
+        }
+
+        function downloadSubmission() {
+            const data = getFormData();
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Civics_Worksheet_${data.studentName.replace(/\s+/g, '_')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('JSON file downloaded successfully!', 'success');
+        }
+
+        function copyForGoogleSheets() {
+            const data = getFormData();
+            let tsv = `Student Name\tDate\tClass\tChosen System\tDecision Speed\tTotal Rubric Score\n`;
+            tsv += `${data.studentName}\t${data.date}\t${data.className}\t${data.chosenSystem}\t${data.operationSpeed}\t${data.rubricTotalScore}\n\n`;
+            
+            tsv += `POSITIVES (PROS):\n`;
+            data.positivesPros.forEach((p, idx) => { tsv += `${idx + 1}. ${p}\n`; });
+            tsv += `\nNEGATIVES (CONS):\n`;
+            data.negativesCons.forEach((c, idx) => { tsv += `${idx + 1}. ${c}\n`; });
+
+            tsv += `\nSection\tResponse\n`;
+            tsv += `Proposals\t${data.proposal.replace(/\n/g, ' ')}\n`;
+            tsv += `Decisions\t${data.decision.replace(/\n/g, ' ')}\n`;
+            tsv += `Scenario 1\t${data.scenario1.replace(/\n/g, ' ')}\n`;
+            tsv += `Scenario 2\t${data.scenario2.replace(/\n/g, ' ')}\n`;
+            tsv += `Scenario 3\t${data.scenario3.replace(/\n/g, ' ')}\n`;
+            tsv += `Justification\t${data.justification.replace(/\n/g, ' ')}\n`;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = tsv;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Copied to clipboard! Ready to paste into Google Sheets.', 'success');
+            } catch (err) {
+                showToast('Copy failed. Please copy manually.', 'warning');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function prepareAndPrint() {
+            window.print();
+        }
+    </script>
+
+</body>
+</html>
